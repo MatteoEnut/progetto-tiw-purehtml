@@ -1,1 +1,9 @@
+# === Eclipse project files ===
+.project
+.classpath
+.settings/
+
+# === Build directories ===
+bin/
+target/
 /build/
