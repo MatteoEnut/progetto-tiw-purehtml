@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Playlists</title>
+</head>
+<body>
+    <h1>Your Playlists</h1>
+
+    <ul>
+        <li th:each="playlist : ${playlists}" th:text="${playlist.name}"></li>
+    </ul>
+
+    <h2>Create a New Playlist</h2>
+    <form action="CreatePlaylist" method="post">
+        <label for="playlistName">Name:</label>
+        <input type="text" id="playlistName" name="name" required>
+        <button type="submit">Create Playlist</button>
+    </form>
+
+    <h2>Create a New Song</h2>
+    <form action="CreateSong" method="post" enctype="multipart/form-data">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br>
+
+        <label for="album">Album:</label>
+        <input type="text" id="album" name="album" required><br>
+
+        <label for="artist">Artist:</label>
+        <input type="text" id="artist" name="artist" required><br>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required><br>
+
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre"><br>
+
+        <label for="image">Cover Image:</label>
+        <input type="file" id="image" name="image" accept="image/*"><br>
+
+        <label for="audio">Audio File:</label>
+        <input type="file" id="audio" name="audio" accept="audio/*"><br>
+
+        <button type="submit">Create Song</button>
+    </form>
+</body>
+</html>
