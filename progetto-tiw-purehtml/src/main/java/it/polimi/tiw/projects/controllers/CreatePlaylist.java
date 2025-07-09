@@ -33,45 +33,60 @@ public class CreatePlaylist extends HttpServlet {
 		connection = ConnectionHandler.getConnection(getServletContext());
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// If the user is not logged in (not present in session) redirect to the login
-		HttpSession session = request.getSession();
-		if (session.isNew() || session.getAttribute("user") == null) {
-			String loginpath = getServletContext().getContextPath() + "/index.html";
-			response.sendRedirect(loginpath);
-			return;
-		}
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	HttpSession session = request.getSession();
+    	if (session.isNew() || session.getAttribute("user") == null) {
+    		String loginpath = getServletContext().getContextPath() + "/index.html";
+    		response.sendRedirect(loginpath);
+    		return;
+    	}
+
+    	boolean isBadRequest = false;
+    	String title = null;
+    	String[] selectedSongIds = request.getParameterValues("songIds");
+    	
+    	if (selectedSongIds == null) {
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "You did not select any song");
+    		return;
+    	}
+
+    	try {
+    		title = StringEscapeUtils.escapeJava(request.getParameter("title"));
+    		isBadRequest = title == null || title.trim().isEmpty();
+    	} catch (Exception e) {
+    		isBadRequest = true;
+    		e.printStackTrace();
+    	}
+
+    	if (isBadRequest) {
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect or missing param values");
+    		return;
+    	}
+
+    	User user = (User) session.getAttribute("user");
+    	PlaylistDAO playlistDAO = new PlaylistDAO(connection);
+
+    	try {
+    		java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+    		String username = user.getUsername();
+
+    		int playlistId = playlistDAO.createPlaylist(title, today, username);
 		
-		boolean isBadRequest = false;
-		String title = null;
-		try {
-			title = StringEscapeUtils.escapeJava(request.getParameter("title"));
-			isBadRequest = title.isEmpty();
-		} catch (Exception e) {
-		    isBadRequest = true;
-		    e.printStackTrace();  
-		}
-		if (isBadRequest) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect or missing param values");
-			return;
-		}
-		
-		User user = (User) session.getAttribute("user");
-		PlaylistDAO playlistDAO = new PlaylistDAO(connection);
-		
-		try {
-			java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
-			String username = user.getUsername();
-			playlistDAO.createPlaylist(title, today, username);
-		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create mission");
-			return;
-		}
-		
-		String ctxpath = getServletContext().getContextPath();
-		String path = ctxpath + "/Home";
-		response.sendRedirect(path);
-	}
+			for (String songIdStr : selectedSongIds) {
+				int songId = Integer.parseInt(songIdStr);
+				playlistDAO.addSongToPlaylist(playlistId, songId);
+			}
+    	} catch (SQLException | NumberFormatException e) {
+    		e.printStackTrace();
+    		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create playlist");
+    		return;
+    	}
+
+    	String ctxpath = getServletContext().getContextPath();
+    	String path = ctxpath + "/Home";
+    	response.sendRedirect(path);
+    }
+
 	
 	public void destroy() {
 		try {
