@@ -21,15 +21,14 @@ public class PlaylistDAO {
 		this.connection = connection;
 	}
 
-	public void createPlaylist(int id, String title, Date date, String username) throws SQLException {
+	public void createPlaylist(String title, Date date, String username) throws SQLException {
 		
-		String query = "INSERT into Playlist (id, title, date, username) VALUES (?,?,?,?)";
+		String query = "INSERT into Playlist (title, date, username) VALUES (?,?,?)";
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
-			pstatement.setInt(1, id);
-			pstatement.setString(2, title);
-			pstatement.setDate(3, date);
-			pstatement.setString(4, username);
+			pstatement.setString(1, title);
+			pstatement.setDate(2, date);
+			pstatement.setString(3, username);
 			pstatement.executeUpdate();
 		} catch (SQLException e) {
 	        e.printStackTrace(); 
