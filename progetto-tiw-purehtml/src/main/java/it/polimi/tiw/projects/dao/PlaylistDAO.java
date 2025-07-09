@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntBinaryOperator;
@@ -20,19 +21,25 @@ public class PlaylistDAO {
 	public PlaylistDAO(Connection connection) {
 		this.connection = connection;
 	}
-
-	public void createPlaylist(String title, Date date, String username) throws SQLException {
+	
+	public int createPlaylist(String title, Date date, String username) throws SQLException {
 		
 		String query = "INSERT into Playlist (title, date, username) VALUES (?,?,?)";
 		
-		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
+		try (PreparedStatement pstatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);) {
 			pstatement.setString(1, title);
 			pstatement.setDate(2, date);
 			pstatement.setString(3, username);
 			pstatement.executeUpdate();
-		} catch (SQLException e) {
-	        e.printStackTrace(); 
-	    }
+			
+			try (ResultSet generatedKeys = pstatement.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					return generatedKeys.getInt(1);
+				} else {
+					throw new SQLException("Creating playlist failed, no ID obtained.");
+				}
+			}
+		}
 	}
 
 	public void addSongToPlaylist(int playlistID, int songID) throws SQLException {

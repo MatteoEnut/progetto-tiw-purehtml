@@ -21,8 +21,10 @@ import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import it.polimi.tiw.projects.beans.Playlist;
+import it.polimi.tiw.projects.beans.Song;
 import it.polimi.tiw.projects.beans.User;
 import it.polimi.tiw.projects.dao.PlaylistDAO;
+import it.polimi.tiw.projects.dao.SongDAO;
 import it.polimi.tiw.projects.utils.ConnectionHandler;
 
 @WebServlet("/Home")
@@ -49,10 +51,8 @@ public class GoToHomePage extends HttpServlet {
 	    connection = ConnectionHandler.getConnection(getServletContext());
 	}
 
-	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
-		// If the user is not logged in (not present in session) redirect to the login
 	    String loginpath = getServletContext().getContextPath() + "/index.html";
 	    HttpSession session = request.getSession();
 	    if (session.isNew() || session.getAttribute("user") == null) {
@@ -62,18 +62,28 @@ public class GoToHomePage extends HttpServlet {
 
 	    User user = (User) session.getAttribute("user");
 	    List<Playlist> playlists = new ArrayList<>();
-	    
+	    List<Song> userSongs = new ArrayList<>();
+
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        playlists = playlistDAO.findPlaylistsByUser(user.getUsername());
+
+	        SongDAO songDAO = new SongDAO(connection);
+	        userSongs = songDAO.findSongsByUser(user.getUsername());
+
 	    } catch (Exception e) {
-	        e.printStackTrace(); 
+	        e.printStackTrace();
+	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlists or songs");
+	        return;
 	    }
 
 	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
 	    ctx.setVariable("playlists", playlists);
+	    ctx.setVariable("userSongs", userSongs);
+
 	    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
 	}
+
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

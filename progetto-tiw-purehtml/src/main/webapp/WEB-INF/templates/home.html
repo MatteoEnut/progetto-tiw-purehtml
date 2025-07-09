@@ -15,6 +15,22 @@
     <form action="CreatePlaylist" method="post">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required>
+
+        <h3>Select songs to add</h3>
+        <div th:if="${#lists.isEmpty(userSongs)}">
+            <p>You have no songs.</p>
+        </div>
+        <div th:if="${!#lists.isEmpty(userSongs)}">
+            <ul>
+                <li th:each="song : ${userSongs}">
+                    <label>
+                        <input type="checkbox" name="songIds" th:value="${song.id}">
+                        <span th:text="${song.title + ' - ' + song.artist}"></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
         <button type="submit">Create Playlist</button>
     </form>
 
