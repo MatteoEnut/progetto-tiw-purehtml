@@ -1,6 +1,7 @@
 package it.polimi.tiw.projects.controllers;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import it.polimi.tiw.projects.utils.ConnectionHandler;
  * Servlet implementation class CreateSong
  */
 @WebServlet("/CreateSong")
+@MultipartConfig
 public class CreateSong extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     
@@ -72,7 +74,7 @@ public class CreateSong extends HttpServlet {
 		    genre = StringEscapeUtils.escapeJava(request.getParameter("genre"));
 
 		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		    date = (Date) sdf.parse(request.getParameter("date"));
+		    date = new Date(sdf.parse(request.getParameter("date")).getTime());
 		    
 		    if (audioPart != null && audioPart.getSize() > 0)
 		        audioBytes = audioPart.getInputStream().readAllBytes();
@@ -112,6 +114,14 @@ public class CreateSong extends HttpServlet {
 		String ctxpath = getServletContext().getContextPath();
 		String path = ctxpath + "/Home";
 		response.sendRedirect(path);
+	}
+	
+	public void destroy() {
+		try {
+			ConnectionHandler.closeConnection(connection);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
