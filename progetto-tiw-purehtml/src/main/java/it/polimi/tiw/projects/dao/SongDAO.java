@@ -1,0 +1,93 @@
+package it.polimi.tiw.projects.dao;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import it.polimi.tiw.projects.beans.Song;
+
+public class SongDAO {
+	
+	private Connection conn;
+	
+	public SongDAO (Connection connection) {
+		this.conn = connection;
+	}
+	
+	public void createSong (
+			String title, String album, String artist, Date date, 
+			String genre, byte[] image, byte[] audio, String username
+			) throws SQLException {
+		
+		String query = "INSERT INTO song (title, album, artist, date, genre, image, audio, username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement pStatement = conn.prepareStatement(query);) {
+			pStatement.setString(1, title);
+			pStatement.setString(2, album);
+			pStatement.setString(3, artist);
+			pStatement.setDate(4, date);
+			pStatement.setString(5, genre);
+			pStatement.setBytes(6, image);
+			pStatement.setBytes(7, audio);
+			pStatement.setString(8, username);
+			pStatement.executeUpdate();
+		}
+		
+	}
+	
+	public List<Song> findSongsByUser(String username) throws SQLException {
+		List<Song> songs = new ArrayList<Song>();
+		
+		String query = "SELECT * from song where username = ? ORDER BY date DESC";
+		try (PreparedStatement pstatement = conn.prepareStatement(query);) {
+			pstatement.setString(1, username);
+			try (ResultSet result = pstatement.executeQuery();) {
+				while (result.next()) {
+					Song song = new Song();
+					song.setId(result.getInt("id"));
+					song.setTitle(result.getString("title"));
+					song.setAlbum(result.getString("album"));
+					song.setArtist(result.getString("artist"));
+					song.setDate(result.getDate("date"));        
+					song.setGenre(result.getString("genre"));
+					song.setImage(result.getBytes("image"));      
+					song.setAudio(result.getBytes("audio"));      
+					song.setUsername(result.getString("username"));
+					songs.add(song);
+				}
+			}
+		}
+		return songs;
+	}
+	
+	public Song findSongById(int id) throws SQLException {
+		Song song = null;
+
+		String query = "SELECT * FROM song WHERE id = ?";
+		try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+			pstatement.setInt(1, id);
+			try (ResultSet result = pstatement.executeQuery()) {
+				if (result.next()) {
+					song = new Song();
+					song.setId(result.getInt("id"));
+					song.setTitle(result.getString("title"));
+					song.setAlbum(result.getString("album"));
+					song.setArtist(result.getString("artist"));
+					song.setDate(result.getDate("date"));
+					song.setGenre(result.getString("genre"));
+					song.setImage(result.getBytes("image"));
+					song.setAudio(result.getBytes("audio"));
+					song.setUsername(result.getString("username"));
+				}
+			}
+		}
+
+		return song;
+	}
+
+	
+	
+}
