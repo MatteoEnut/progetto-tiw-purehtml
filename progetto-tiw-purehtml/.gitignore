@@ -1,6 +1,6 @@
 # === Eclipse project files ===
 .project
-*.classpath
+.classpath
 .settings/
 
 # === Build directories ===
