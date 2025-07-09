@@ -20,7 +20,9 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
+import it.polimi.tiw.projects.beans.Playlist;
 import it.polimi.tiw.projects.beans.User;
+import it.polimi.tiw.projects.dao.PlaylistDAO;
 import it.polimi.tiw.projects.utils.ConnectionHandler;
 
 @WebServlet("/Home")
@@ -28,32 +30,51 @@ public class GoToHomePage extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private TemplateEngine templateEngine;
 	private Connection connection = null;
+	private JakartaServletWebApplication webApp;
 
 	public GoToHomePage() {
 		super();
 	}
-
+	
 	public void init() throws ServletException {
-		ServletContext servletContext = getServletContext();
-		JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);     WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApplication);
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		this.templateEngine = new TemplateEngine();
-		this.templateEngine.setTemplateResolver(templateResolver);
-		templateResolver.setSuffix(".html");
-		connection = ConnectionHandler.getConnection(getServletContext());
+	    ServletContext servletContext = getServletContext();
+	    webApp = JakartaServletWebApplication.buildApplication(servletContext);
+	    WebApplicationTemplateResolver templateResolver = new WebApplicationTemplateResolver(webApp);
+	    templateResolver.setTemplateMode(TemplateMode.HTML);
+	    templateResolver.setSuffix(".html");
+
+	    this.templateEngine = new TemplateEngine();
+	    this.templateEngine.setTemplateResolver(templateResolver);
+
+	    connection = ConnectionHandler.getConnection(getServletContext());
 	}
 
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 		// If the user is not logged in (not present in session) redirect to the login
-		String loginpath = getServletContext().getContextPath() + "/index.html";
-		HttpSession session = request.getSession();
-		if (session.isNew() || session.getAttribute("user") == null) {
-			response.sendRedirect(loginpath);
-			return;
-		}
-		User user = (User) session.getAttribute("user");
+	    String loginpath = getServletContext().getContextPath() + "/index.html";
+	    HttpSession session = request.getSession();
+	    if (session.isNew() || session.getAttribute("user") == null) {
+	        response.sendRedirect(loginpath);
+	        return;
+	    }
+
+	    User user = (User) session.getAttribute("user");
+	    List<Playlist> playlists = new ArrayList<>();
+	    
+	    try {
+	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
+	        playlists = playlistDAO.findPlaylistsByUser(user.getUsername());
+	    } catch (Exception e) {
+	        e.printStackTrace(); 
+	    }
+
+	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+	    ctx.setVariable("playlists", playlists);
+	    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
 	}
+
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
