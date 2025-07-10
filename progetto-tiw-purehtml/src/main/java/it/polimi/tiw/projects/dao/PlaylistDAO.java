@@ -91,7 +91,7 @@ public class PlaylistDAO {
 	public List<Playlist> findPlaylistsByUser(String username) {
 	    List<Playlist> playlists = new ArrayList<>();
 
-	    String query = "SELECT * FROM Playlist WHERE username = ?";
+	    String query = "SELECT * FROM Playlist WHERE username = ? ORDER BY date DESC";
 
 	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
 	    	pstatement.setString(1, username);

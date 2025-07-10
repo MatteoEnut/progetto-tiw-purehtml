@@ -34,14 +34,15 @@ public class SongDAO {
 			pStatement.setBytes(7, audio);
 			pStatement.setString(8, username);
 			pStatement.executeUpdate();
-		}
-		
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 	}
 	
 	public List<Song> findSongsByUser(String username) throws SQLException {
 		List<Song> songs = new ArrayList<Song>();
 		
-		String query = "SELECT * from song where username = ? ORDER BY date DESC";
+		String query = "SELECT * FROM song WHERE username = ? ORDER BY artist ASC, date ASC";
 		try (PreparedStatement pstatement = conn.prepareStatement(query);) {
 			pstatement.setString(1, username);
 			try (ResultSet result = pstatement.executeQuery();) {
@@ -59,7 +60,10 @@ public class SongDAO {
 					songs.add(song);
 				}
 			}
-		}
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+		
 		return songs;
 	}
 	
@@ -83,7 +87,9 @@ public class SongDAO {
 					song.setUsername(result.getString("username"));
 				}
 			}
-		}
+		} catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 
 		return song;
 	}

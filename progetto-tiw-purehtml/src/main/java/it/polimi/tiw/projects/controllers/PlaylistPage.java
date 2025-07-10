@@ -27,9 +27,7 @@ import it.polimi.tiw.projects.dao.PlaylistDAO;
 import it.polimi.tiw.projects.dao.SongDAO;
 import it.polimi.tiw.projects.utils.ConnectionHandler;
 
-/**
- * Servlet implementation class PlaylistPage
- */
+
 @WebServlet("/Playlist")
 public class PlaylistPage extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -38,9 +36,7 @@ public class PlaylistPage extends HttpServlet {
 	private Connection connection = null;
 	private JakartaServletWebApplication webApp;
 	
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
+	
     public PlaylistPage() {
         super();
     }
@@ -59,37 +55,48 @@ public class PlaylistPage extends HttpServlet {
 	    connection = ConnectionHandler.getConnection(getServletContext());
 	}
 	
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// If the user is not logged in (not present in session) redirect to the login
 	    String loginpath = getServletContext().getContextPath() + "/index.html";
 	    HttpSession session = request.getSession();
 	    if (session.isNew() || session.getAttribute("user") == null) {
 	        response.sendRedirect(loginpath);
 	        return;
 	    }
-		
+
 	    int id = Integer.parseInt(request.getParameter("id"));
 	    List<Song> songs = new ArrayList<>();
 	    Playlist playlist = null;
+	    List<Song> allUserSongs = new ArrayList<>();
 	    
 	    // devo controllare se l'id è mio
-	    
+
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
-	        songs = playlistDAO.findSongsByPlaylist(id);
-	        playlist = playlistDAO.findPlaylistById(id);
-	    } catch (Exception e) {
-	        e.printStackTrace(); 
-	    }
+	        SongDAO songDAO = new SongDAO(connection);
 
+	        playlist = playlistDAO.findPlaylistById(id);
+	        songs = playlistDAO.findSongsByPlaylist(id);
+
+	        User user = (User) session.getAttribute("user");
+	        allUserSongs = songDAO.findSongsByUser(user.getUsername());
+
+	        final List<Song> songsInPlaylist = songs;
+	        // Rimuovo i brani già nella playlist
+	        allUserSongs.removeIf(song -> songsInPlaylist.stream().anyMatch(s -> s.getId() == song.getId()));
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlist or songs");
+	    }
+	    
 	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
-	    ctx.setVariable("songs", songs);
-	    ctx.setVariable("playlist", playlist);
-	    templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
+        ctx.setVariable("songs", songs);
+        ctx.setVariable("playlist", playlist);
+        ctx.setVariable("availableSongs", allUserSongs);
+
+        templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
 	}
+
 	
 	public void destroy() {
 		try {

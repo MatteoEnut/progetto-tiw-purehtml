@@ -20,5 +20,28 @@
 			</tr>
 		</tbody>
 	</table>
+	
+	<h3>Add songs to this playlist</h3>
+
+	<form th:action="@{/AddSongsToPlaylist}" method="post">
+	    <input type="hidden" name="playlistId" th:value="${playlist.id}" />
+	
+	    <div th:if="${#lists.isEmpty(availableSongs)}">
+	        <p>No available songs to add.</p>
+	    </div>
+	    <div th:if="${!#lists.isEmpty(availableSongs)}">
+	        <ul>
+	            <li th:each="song : ${availableSongs}">
+	                <label>
+	                    <input type="checkbox" name="songIds" th:value="${song.id}" />
+	                    <span th:text="${song.title + ' - ' + song.artist}"></span>
+	                </label>
+	            </li>
+	        </ul>
+	    </div>
+	
+	    <button type="submit">Add Selected Songs</button>
+	</form>
+	
 </body>
 </html>
