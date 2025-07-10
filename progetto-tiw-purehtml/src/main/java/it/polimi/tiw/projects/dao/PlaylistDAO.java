@@ -88,6 +88,58 @@ public class PlaylistDAO {
 	    return songs;
 	}
 	
+	public List<Song> findSongsByPlaylistPaged(int playlistID, int offset, int limit) {
+	    List<Song> songs = new ArrayList<>();
+
+	    String query = "SELECT s.* FROM Song s " +
+	                   "JOIN Playlist_Song ps ON s.id = ps.song_id " +
+	                   "WHERE ps.playlist_id = ? " +
+	                   "ORDER BY s.artist ASC, s.date ASC " +
+	                   "LIMIT ? OFFSET ?";
+
+	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+	        pstatement.setInt(1, playlistID);
+	        pstatement.setInt(2, limit);
+	        pstatement.setInt(3, offset);
+
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            while (result.next()) {
+	                Song song = new Song();
+	                song.setId(result.getInt("id"));
+	                song.setTitle(result.getString("title"));
+	                song.setAlbum(result.getString("album"));
+	                song.setArtist(result.getString("artist"));
+	                song.setDate(result.getDate("date"));
+	                song.setGenre(result.getString("genre"));
+	                song.setImage(result.getBytes("image"));
+	                song.setAudio(result.getBytes("audio"));
+	                song.setUsername(result.getString("username"));
+
+	                songs.add(song);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return songs;
+	}
+
+	public int countSongsInPlaylist(int playlistID) {
+	    String query = "SELECT COUNT(*) FROM Playlist_Song WHERE playlist_id = ?";
+	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+	        pstatement.setInt(1, playlistID);
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            if (result.next()) {
+	                return result.getInt(1);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return 0;
+	}
+	
 	public List<Playlist> findPlaylistsByUser(String username) {
 	    List<Playlist> playlists = new ArrayList<>();
 

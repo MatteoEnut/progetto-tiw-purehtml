@@ -63,37 +63,58 @@ public class PlaylistPage extends HttpServlet {
 	        return;
 	    }
 
-	    int id = Integer.parseInt(request.getParameter("id"));
-	    List<Song> songs = new ArrayList<>();
-	    Playlist playlist = null;
+	    int playlistId = Integer.parseInt(request.getParameter("id"));
+	    int page = 0;
+	    final int pageSize = 5;
+
+	    String pageParam = request.getParameter("page");
+	    if (pageParam != null) {
+	        try {
+	            page = Integer.parseInt(pageParam);
+	        } catch (NumberFormatException e) {
+	            page = 0;
+	        }
+	    }
+
+	    List<Song> pagedSongs = new ArrayList<>();
 	    List<Song> allUserSongs = new ArrayList<>();
+	    Playlist playlist = null;
 
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        SongDAO songDAO = new SongDAO(connection);
 
-	        playlist = playlistDAO.findPlaylistById(id);
-	        songs = playlistDAO.findSongsByPlaylist(id);
+	        playlist = playlistDAO.findPlaylistById(playlistId);
+	        int totalSongs = playlistDAO.countSongsInPlaylist(playlistId);
+
+	        int offset = page * pageSize;
+	        pagedSongs = playlistDAO.findSongsByPlaylistPaged(playlistId, offset, pageSize);
 
 	        User user = (User) session.getAttribute("user");
 	        allUserSongs = songDAO.findSongsByUser(user.getUsername());
 
-	        final List<Song> songsInPlaylist = songs;
-	        
-	        allUserSongs.removeIf(song -> songsInPlaylist.stream().anyMatch(s -> s.getId() == song.getId()));
+	        List<Song> finalPagedSongs = pagedSongs;
+	        allUserSongs.removeIf(song -> finalPagedSongs.stream().anyMatch(s -> s.getId() == song.getId()));
+
+	        boolean hasPrevious = page > 0;
+	        boolean hasNext = offset + pageSize < totalSongs;
+
+	        final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+	        ctx.setVariable("songs", pagedSongs);
+	        ctx.setVariable("playlist", playlist);
+	        ctx.setVariable("availableSongs", allUserSongs);
+	        ctx.setVariable("page", page);
+	        ctx.setVariable("hasPrevious", hasPrevious);
+	        ctx.setVariable("hasNext", hasNext);
+
+	        templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlist or songs");
 	    }
-	    
-	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
-        ctx.setVariable("songs", songs);
-        ctx.setVariable("playlist", playlist);
-        ctx.setVariable("availableSongs", allUserSongs);
-
-        templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
 	}
+
 
 	
 	public void destroy() {
