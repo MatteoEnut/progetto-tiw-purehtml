@@ -67,8 +67,6 @@ public class PlaylistPage extends HttpServlet {
 	    List<Song> songs = new ArrayList<>();
 	    Playlist playlist = null;
 	    List<Song> allUserSongs = new ArrayList<>();
-	    
-	    // devo controllare se l'id è mio
 
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
@@ -81,7 +79,7 @@ public class PlaylistPage extends HttpServlet {
 	        allUserSongs = songDAO.findSongsByUser(user.getUsername());
 
 	        final List<Song> songsInPlaylist = songs;
-	        // Rimuovo i brani già nella playlist
+	        
 	        allUserSongs.removeIf(song -> songsInPlaylist.stream().anyMatch(s -> s.getId() == song.getId()));
 
 	    } catch (Exception e) {

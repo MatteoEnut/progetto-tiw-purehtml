@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Player - ' + ${song.title}">Player</title>
+</head>
+<body>
+
+    <h1 th:text="${song.title}"></h1>
+    <p><strong>Artist:</strong> <span th:text="${song.artist}"></span></p>
+    <p><strong>Album:</strong> <span th:text="${song.album}"></span></p>
+    <p><strong>Date:</strong> <span th:text="${#dates.format(song.date, 'dd/MM/yyyy')}"></span></p>
+    <p><strong>Genre:</strong> <span th:text="${song.genre}"></span></p>
+
+    <div>
+        <img th:src="@{'/GetSongMedia?id=' + ${song.id} + '&type=image'}" alt="Cover" width="300"/>
+    </div>
+
+    <div>
+        <audio controls>
+            <source th:src="@{'/GetSongMedia?id=' + ${song.id} + '&type=audio'}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+</body>
+</html>
