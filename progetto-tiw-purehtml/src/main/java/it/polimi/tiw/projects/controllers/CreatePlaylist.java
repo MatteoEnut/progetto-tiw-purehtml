@@ -45,7 +45,7 @@ public class CreatePlaylist extends HttpServlet {
     	String title = null;
     	String[] selectedSongIds = request.getParameterValues("songIds");
     	
-    	if (selectedSongIds == null) {
+    	if (selectedSongIds == null || selectedSongIds.length == 0) {
     		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "You did not select any song");
     		return;
     	}
@@ -67,20 +67,31 @@ public class CreatePlaylist extends HttpServlet {
     	PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 
     	try {
-    		java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
-    		String username = user.getUsername();
+            connection.setAutoCommit(false); 
 
-    		int playlistId = playlistDAO.createPlaylist(title, today, username);
-		
-			for (String songIdStr : selectedSongIds) {
-				int songId = Integer.parseInt(songIdStr);
-				playlistDAO.addSongToPlaylist(playlistId, songId);
-			}
-    	} catch (SQLException | NumberFormatException e) {
-    		e.printStackTrace();
-    		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create playlist");
-    		return;
-    	}
+            java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+            String username = user.getUsername();
+
+            int playlistId = playlistDAO.createPlaylist(title, today, username);
+
+            for (String songIdStr : selectedSongIds) {
+                int songId = Integer.parseInt(songIdStr);
+                playlistDAO.addSongToPlaylist(playlistId, songId);
+            }
+
+            connection.commit();
+            connection.setAutoCommit(true); 
+
+        } catch (SQLException | NumberFormatException e) {
+            try {
+                connection.rollback(); 
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create playlist");
+            return;
+        }
 
     	String ctxpath = getServletContext().getContextPath();
     	String path = ctxpath + "/Home";
