@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.text.ParseException;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import it.polimi.tiw.projects.beans.Playlist;
 import it.polimi.tiw.projects.beans.User;
@@ -40,13 +42,21 @@ public class CreatePlaylist extends HttpServlet {
     		response.sendRedirect(loginpath);
     		return;
     	}
-
+    	
+		JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(getServletContext());
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+    	
+    	String ctxpath = getServletContext().getContextPath();
+    	String path = ctxpath + "/Home";
+    	
     	boolean isBadRequest = false;
     	String title = null;
     	String[] selectedSongIds = request.getParameterValues("songIds");
     	
     	if (selectedSongIds == null || selectedSongIds.length == 0) {
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "You did not select any song");
+    		//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "You did not select any song");
+		    request.getSession().setAttribute("playlistErrorMsg", "No song has been selected");
+		    response.sendRedirect(path);
     		return;
     	}
 
@@ -59,7 +69,9 @@ public class CreatePlaylist extends HttpServlet {
     	}
 
     	if (isBadRequest) {
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect or missing param values");
+    		//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Incorrect or missing param values");
+		    request.getSession().setAttribute("playlistErrorMsg", "Playlist name unsupported");
+		    response.sendRedirect(path);
     		return;
     	}
 
@@ -89,12 +101,11 @@ public class CreatePlaylist extends HttpServlet {
                 ex.printStackTrace();
             }
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create playlist");
+		    request.getSession().setAttribute("playlistErrorMsg", "Unable to create playlist");
+		    response.sendRedirect(path);
             return;
         }
 
-    	String ctxpath = getServletContext().getContextPath();
-    	String path = ctxpath + "/Home";
     	response.sendRedirect(path);
     }
 

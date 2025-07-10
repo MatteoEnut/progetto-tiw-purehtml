@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat;
 import java.sql.Date;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import it.polimi.tiw.projects.beans.User;
 import it.polimi.tiw.projects.dao.SongDAO;
@@ -59,6 +61,12 @@ public class CreateSong extends HttpServlet {
 			return;
 		}
 		
+		JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(getServletContext());
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+		
+        String ctxpath = getServletContext().getContextPath();
+		String path = ctxpath + "/Home";
+        
 		boolean isBadRequest = false;
 		String title = null, album = null, artist = null, genre = null;
 		Date date = null;
@@ -91,12 +99,14 @@ public class CreateSong extends HttpServlet {
 
 		} catch (Exception e) {
 		    isBadRequest = true;
-		    e.printStackTrace();  // for debugging
+		    //e.printStackTrace();  // for debugging
 		}
 
 		if (isBadRequest) {
-		    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or incorrect song data");
-		    return;
+		    //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or incorrect song data");
+		    request.getSession().setAttribute("songErrorMsg", "Missing or incorrect song data");
+		    response.sendRedirect(path);
+			return;
 		}
 		
 		User user = (User) session.getAttribute("user");
@@ -106,13 +116,13 @@ public class CreateSong extends HttpServlet {
 		try {
 		    songDAO.createSong(title, album, artist, date, genre, imageBytes, audioBytes, user.getUsername());
 		} catch (SQLException e) {
-		    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to create song");
+		    request.getSession().setAttribute("songErrorMsg", "Impossible to create song");
+		    response.sendRedirect(path);
 		    return;
 		}
 
 		// Redirect to home after successful creation
-		String ctxpath = getServletContext().getContextPath();
-		String path = ctxpath + "/Home";
+		
 		response.sendRedirect(path);
 	}
 	

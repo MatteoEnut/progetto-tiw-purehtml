@@ -50,6 +50,10 @@ public class CheckLogin extends HttpServlet {
 		String usrn = null;
 		String pwd = null;
 		
+		JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(getServletContext());
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+		String path;
+		
 		try {
 			usrn = StringEscapeUtils.escapeJava(request.getParameter("username"));
 			pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
@@ -59,8 +63,12 @@ public class CheckLogin extends HttpServlet {
 			}
 
 		} catch (Exception e) {
-			// for debugging only e.printStackTrace();
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credential value");
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credential value");
+
+			
+			ctx.setVariable("errorMsg", "Missing or empty credential value");
+			path = "/index.html";
+			templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 
@@ -70,19 +78,17 @@ public class CheckLogin extends HttpServlet {
 		try {
 			user = userDao.checkCredentials(usrn, pwd);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not Possible to check credentials");
+			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not Possible to check credentials");
+			ctx.setVariable("errorMsg", "Not Possible to check credentials");
+			path = "/index.html";
+			templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 
 		// If the user exists, add info to the session and go to home page, otherwise
 		// show login page with error message
 
-		String path;
 		if (user == null) {
-			JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(getServletContext());
-	        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
-
 			ctx.setVariable("errorMsg", "Incorrect username or password");
 			path = "/index.html";
 			templateEngine.process(path, ctx, response.getWriter());
@@ -94,6 +100,12 @@ public class CheckLogin extends HttpServlet {
 
 	}
 
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String loginpath = getServletContext().getContextPath() + "/index.html";
+		response.sendRedirect(loginpath);
+	}
+	
 	public void destroy() {
 		try {
 			ConnectionHandler.closeConnection(connection);

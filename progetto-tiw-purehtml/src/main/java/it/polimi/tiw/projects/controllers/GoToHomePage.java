@@ -60,24 +60,42 @@ public class GoToHomePage extends HttpServlet {
 	        return;
 	    }
 
+	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+	    
 	    User user = (User) session.getAttribute("user");
 	    List<Playlist> playlists = new ArrayList<>();
 	    List<Song> userSongs = new ArrayList<>();
-
+	    
+	    String songErrorMsg = (String) request.getSession().getAttribute("songErrorMsg");
+	    request.getSession().removeAttribute("songErrorMsg");
+	    request.setAttribute("songErrorMsg", songErrorMsg);
+	    
+	    String playlistErrorMsg = (String) request.getSession().getAttribute("playlistErrorMsg");
+	    request.getSession().removeAttribute("playlistErrorMsg");
+	    request.setAttribute("playlistErrorMsg", playlistErrorMsg);
+	    
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        playlists = playlistDAO.findPlaylistsByUser(user.getUsername());
 
-	        SongDAO songDAO = new SongDAO(connection);
-	        userSongs = songDAO.findSongsByUser(user.getUsername());
-
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlists or songs");
-	        return;
+	        //e.printStackTrace();
+	        //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlists or songs");
+	    	ctx.setVariable("errorMsg", "Unable to load playlists");
+		    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
+	    	return;
 	    }
 
-	    final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+	    try {
+	        SongDAO songDAO = new SongDAO(connection);
+	        userSongs = songDAO.findSongsByUser(user.getUsername());
+	    }
+	    catch (Exception e) {
+	    	ctx.setVariable("errorMsg", "Unable to load songs");
+		    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
+	    	return;
+	    }
+	    
 	    ctx.setVariable("playlists", playlists);
 	    ctx.setVariable("userSongs", userSongs);
 
