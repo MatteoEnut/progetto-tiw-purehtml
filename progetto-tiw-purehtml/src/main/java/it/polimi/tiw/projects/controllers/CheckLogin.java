@@ -61,11 +61,16 @@ public class CheckLogin extends HttpServlet {
 			if (usrn == null || pwd == null || usrn.isEmpty() || pwd.isEmpty()) {
 				throw new Exception("Missing or empty credential value");
 			}
+			
+			if (usrn.length() > 50 || pwd.length() > 255) {
+			    throw new Exception("Input too long");
+			}
+
 
 		} catch (Exception e) {
 			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credential value");
 
-			ctx.setVariable("errorMsg", "Missing or empty credential value");
+			ctx.setVariable("errorMsg", e.getMessage());
 			path = "/index.html";
 			templateEngine.process(path, ctx, response.getWriter());
 			return;

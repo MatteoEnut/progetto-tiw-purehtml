@@ -1,0 +1,44 @@
+/* player.css */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f7f9fc;
+  margin: 0;
+  padding: 2rem;
+  color: #333;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+strong {
+  color: #34495e;
+}
+
+img {
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  max-width: 90%;
+  height: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+audio {
+  margin-top: 1rem;
+  width: 80%;
+  max-width: 600px;
+}
+
+.error {
+  color: red;
+  margin-bottom: 1rem;
+}
