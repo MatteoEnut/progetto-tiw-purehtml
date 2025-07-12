@@ -65,7 +65,6 @@ public class CheckLogin extends HttpServlet {
 		} catch (Exception e) {
 			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credential value");
 
-			
 			ctx.setVariable("errorMsg", "Missing or empty credential value");
 			path = "/index.html";
 			templateEngine.process(path, ctx, response.getWriter());

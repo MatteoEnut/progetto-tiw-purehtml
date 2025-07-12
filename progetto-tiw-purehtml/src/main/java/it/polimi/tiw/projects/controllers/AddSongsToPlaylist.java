@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+
 import it.polimi.tiw.projects.beans.User;
 import it.polimi.tiw.projects.dao.PlaylistDAO;
 import it.polimi.tiw.projects.utils.ConnectionHandler;
@@ -31,23 +34,35 @@ public class AddSongsToPlaylist extends HttpServlet {
             response.sendRedirect(getServletContext().getContextPath() + "/index.html");
             return;
         }
-
+        
+		JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(getServletContext());
+        WebContext ctx = new WebContext(webApplication.buildExchange(request, response), request.getLocale());
+		
+        String ctxpath = getServletContext().getContextPath();
+		String homePath = ctxpath + "/Home";
+        String playlistPath = ctxpath + "/Playlist?id=";
+		
         String[] songIds = request.getParameterValues("songIds");
         String playlistIdParam = request.getParameter("playlistId");
 
-        if (songIds == null || playlistIdParam == null || playlistIdParam.isBlank()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing playlist or songs");
-            return;
-        }
-
         int playlistId;
+        
         try {
             playlistId = Integer.parseInt(playlistIdParam);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid playlist ID");
-            return;
+        } catch (Exception e) {
+            //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid playlist ID");
+            response.sendRedirect(homePath);
+        	return;
+        }
+        
+        if (songIds == null) {
+            //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing playlist or songs");
+        	request.getSession().setAttribute("songErrorMsg", "No songs selected");
+        	response.sendRedirect(playlistPath + playlistId);
+        	return;
         }
 
+        
         try {
             PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 
@@ -56,9 +71,11 @@ public class AddSongsToPlaylist extends HttpServlet {
                 playlistDAO.addSongToPlaylist(playlistId, songId);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
-            return;
+            //e.printStackTrace();
+            //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
+        	request.getSession().setAttribute("songErrorMsg", "Unable to complete database operation");
+        	response.sendRedirect(playlistPath + playlistId);
+        	return;
         }
 
         // Redirect alla pagina playlist aggiornata

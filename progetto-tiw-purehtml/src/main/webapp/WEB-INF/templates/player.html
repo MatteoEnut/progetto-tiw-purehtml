@@ -5,7 +5,9 @@
     <title th:text="'Player - ' + ${song.title}">Player</title>
 </head>
 <body>
-
+	
+	<p th:text=" ${errorMsg}"></p>
+	
     <h1 th:text="${song.title}"></h1>
     <p><strong>Artist:</strong> <span th:text="${song.artist}"></span></p>
     <p><strong>Album:</strong> <span th:text="${song.album}"></span></p>

@@ -50,7 +50,9 @@ public class PlayerPage extends HttpServlet {
 			response.sendRedirect(getServletContext().getContextPath() + "/index.html");
 			return;
 		}
-
+		
+		final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+		
 		int songId = Integer.parseInt(request.getParameter("id"));
 		Song song = null;
 
@@ -58,18 +60,20 @@ public class PlayerPage extends HttpServlet {
 			SongDAO songDAO = new SongDAO(connection);
 			song = songDAO.findSongById(songId);
 			if (song == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Song not found");
+				//response.sendError(HttpServletResponse.SC_NOT_FOUND, "Song not found");
+				ctx.setVariable("errorMsg", "Song not found");
+				templateEngine.process("/WEB-INF/templates/player.html", ctx, response.getWriter());
 				return;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load song");
+			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load song");
+			ctx.setVariable("errorMsg", "Unable to load song");
+			templateEngine.process("/WEB-INF/templates/player.html", ctx, response.getWriter());
 			return;
 		}
 
-		final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
 		ctx.setVariable("song", song);
-
 		templateEngine.process("/WEB-INF/templates/player.html", ctx, response.getWriter());
 	}
 

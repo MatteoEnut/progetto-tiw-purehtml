@@ -62,7 +62,11 @@ public class PlaylistPage extends HttpServlet {
 	        response.sendRedirect(loginpath);
 	        return;
 	    }
-
+	    
+	    String songErrorMsg = (String) request.getSession().getAttribute("songErrorMsg");
+	    request.getSession().removeAttribute("songErrorMsg");
+	    request.setAttribute("songErrorMsg", songErrorMsg);
+	    
 	    int playlistId = Integer.parseInt(request.getParameter("id"));
 	    int page = 0;
 	    final int pageSize = 5;
@@ -79,7 +83,9 @@ public class PlaylistPage extends HttpServlet {
 	    List<Song> pagedSongs = new ArrayList<>();
 	    List<Song> allUserSongs = new ArrayList<>();
 	    Playlist playlist = null;
-
+	    
+        final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+	    
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        SongDAO songDAO = new SongDAO(connection);
@@ -99,7 +105,6 @@ public class PlaylistPage extends HttpServlet {
 	        boolean hasPrevious = page > 0;
 	        boolean hasNext = offset + pageSize < totalSongs;
 
-	        final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
 	        ctx.setVariable("songs", pagedSongs);
 	        ctx.setVariable("playlist", playlist);
 	        ctx.setVariable("availableSongs", allUserSongs);
@@ -110,8 +115,10 @@ public class PlaylistPage extends HttpServlet {
 	        templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
 
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlist or songs");
+	        //e.printStackTrace();
+	        //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlist or songs");
+	    	ctx.setVariable("errorMsg", "Unable to load playlist or songs");
+		    templateEngine.process("/WEB-INF/templates/playlist.html", ctx, response.getWriter());
 	    }
 	}
 
