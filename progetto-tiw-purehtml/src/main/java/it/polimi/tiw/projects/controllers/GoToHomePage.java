@@ -74,6 +74,8 @@ public class GoToHomePage extends HttpServlet {
 	    request.getSession().removeAttribute("playlistErrorMsg");
 	    request.setAttribute("playlistErrorMsg", playlistErrorMsg);
 	    
+	    boolean failed = false;
+	    
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        playlists = playlistDAO.findPlaylistsByUser(user.getUsername());
@@ -81,8 +83,8 @@ public class GoToHomePage extends HttpServlet {
 	    } catch (Exception e) {
 	        //e.printStackTrace();
 	        //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load playlists or songs");
-	    	ctx.setVariable("errorMsg", "Unable to load playlists");
-		    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
+	    	ctx.setVariable("playlistListErrorMsg", "Unable to load playlists");
+		    //templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
 	    	return;
 	    }
 
@@ -91,8 +93,8 @@ public class GoToHomePage extends HttpServlet {
 	        userSongs = songDAO.findSongsByUser(user.getUsername());
 	    }
 	    catch (Exception e) {
-	    	ctx.setVariable("errorMsg", "Unable to load songs");
-		    templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
+	    	ctx.setVariable("songListErrorMsg", "Unable to load songs");
+		    //templateEngine.process("/WEB-INF/templates/home.html", ctx, response.getWriter());
 	    	return;
 	    }
 	    
