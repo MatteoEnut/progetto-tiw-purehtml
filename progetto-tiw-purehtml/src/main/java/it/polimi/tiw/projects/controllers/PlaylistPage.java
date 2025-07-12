@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.Console;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -89,14 +90,24 @@ public class PlaylistPage extends HttpServlet {
 	    try {
 	        PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 	        SongDAO songDAO = new SongDAO(connection);
-
+	        User user = (User) session.getAttribute("user");
+	        
 	        playlist = playlistDAO.findPlaylistById(playlistId);
+	        
+	        if (playlist == null || !playlist.getUsername().equals(user.getUsername())) {
+	            //response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+	            String ctxpath = getServletContext().getContextPath();
+	    		String path = ctxpath + "/Home";
+	            response.sendRedirect(path);
+	        	return;
+	        }
+	        
 	        int totalSongs = playlistDAO.countSongsInPlaylist(playlistId);
 
 	        int offset = page * pageSize;
 	        pagedSongs = playlistDAO.findSongsByPlaylistPaged(playlistId, offset, pageSize);
 
-	        User user = (User) session.getAttribute("user");
+	        
 	        allUserSongs = songDAO.findSongsByUser(user.getUsername());
 
 	        List<Song> finalPagedSongs = pagedSongs;

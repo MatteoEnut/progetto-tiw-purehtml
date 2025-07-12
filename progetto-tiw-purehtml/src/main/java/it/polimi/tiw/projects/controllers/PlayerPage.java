@@ -19,6 +19,7 @@ import org.thymeleaf.templateresolver.WebApplicationTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import it.polimi.tiw.projects.beans.Song;
+import it.polimi.tiw.projects.beans.User;
 import it.polimi.tiw.projects.dao.SongDAO;
 import it.polimi.tiw.projects.utils.ConnectionHandler;
 
@@ -52,24 +53,28 @@ public class PlayerPage extends HttpServlet {
 		}
 		
 		final WebContext ctx = new WebContext(webApp.buildExchange(request, response), request.getLocale());
+
+        String ctxpath = getServletContext().getContextPath();
+		String path = ctxpath + "/Home";
 		
 		int songId = Integer.parseInt(request.getParameter("id"));
 		Song song = null;
 
+		
 		try {
 			SongDAO songDAO = new SongDAO(connection);
 			song = songDAO.findSongById(songId);
-			if (song == null) {
+			User user = (User) session.getAttribute("user");
+			
+			if (song == null || !song.getUsername().equals(user.getUsername())) {
 				//response.sendError(HttpServletResponse.SC_NOT_FOUND, "Song not found");
-				ctx.setVariable("errorMsg", "Song not found");
-				templateEngine.process("/WEB-INF/templates/player.html", ctx, response.getWriter());
+				response.sendRedirect(path);
 				return;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to load song");
-			ctx.setVariable("errorMsg", "Unable to load song");
-			templateEngine.process("/WEB-INF/templates/player.html", ctx, response.getWriter());
+			response.sendRedirect(path);
 			return;
 		}
 
