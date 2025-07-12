@@ -1,5 +1,26 @@
-/* playlist.css */
+.song-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.song-card {
+    width: 180px;
+    margin: 0 10px;
+    text-align: center;
+}
+.song-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
 
+/*
 body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f7f9fc;
@@ -99,3 +120,6 @@ li {
 
 p {
   color: red;
+}
+*/
+  
