@@ -124,21 +124,6 @@ public class PlaylistDAO {
 
 	    return songs;
 	}
-
-	public int countSongsInPlaylist(int playlistID) {
-	    String query = "SELECT COUNT(*) FROM Playlist_Song WHERE playlist_id = ?";
-	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
-	        pstatement.setInt(1, playlistID);
-	        try (ResultSet result = pstatement.executeQuery()) {
-	            if (result.next()) {
-	                return result.getInt(1);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return 0;
-	}
 	
 	public List<Playlist> findPlaylistsByUser(String username) {
 	    List<Playlist> playlists = new ArrayList<>();
