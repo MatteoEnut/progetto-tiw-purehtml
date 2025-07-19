@@ -64,13 +64,22 @@ public class AddSongsToPlaylist extends HttpServlet {
 
         
         try {
+        	connection.setAutoCommit(false); 
             PlaylistDAO playlistDAO = new PlaylistDAO(connection);
 
             for (String songIdStr : songIds) {
                 int songId = Integer.parseInt(songIdStr);
                 playlistDAO.addSongToPlaylist(playlistId, songId);
             }
+            connection.commit();
+            connection.setAutoCommit(true);
+            
         } catch (SQLException e) {
+        	try {
+                connection.rollback(); 
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             //e.printStackTrace();
             //response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
         	request.getSession().setAttribute("songErrorMsg", "Unable to complete database operation");

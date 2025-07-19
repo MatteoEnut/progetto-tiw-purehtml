@@ -102,7 +102,6 @@ public class PlaylistPage extends HttpServlet {
 	        	return;
 	        }
 	        
-	        //int totalSongs = playlistDAO.countSongsInPlaylist(playlistId);
 	        List<Song> allSongsInPlaylist = playlistDAO.findSongsByPlaylist(playlistId);
 	        int totalSongs = allSongsInPlaylist.size();
 	        
