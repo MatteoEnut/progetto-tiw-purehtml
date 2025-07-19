@@ -45,10 +45,6 @@ public class CreateSong extends HttpServlet {
 		connection = ConnectionHandler.getConnection(getServletContext());
 	}
     
-	private Date getMeTomorrow() {
-		return new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-	}
-    
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -88,12 +84,14 @@ public class CreateSong extends HttpServlet {
 		        audioBytes = audioPart.getInputStream().readAllBytes();
 		    if (imagePart != null && imagePart.getSize() > 0)
 		        imageBytes = imagePart.getInputStream().readAllBytes();
-
+		    
+		    Date today = new Date(System.currentTimeMillis());
+		    
 		    isBadRequest = title == null || title.isEmpty()
 		        || album == null || album.isEmpty()
 		        || artist == null || artist.isEmpty()
 		        || genre == null || genre.isEmpty()
-		        || date == null || getMeTomorrow().before(date)
+		        || date == null || today.before(date)
 		        || audioBytes == null || audioBytes.length == 0
 		        || imageBytes == null || imageBytes.length == 0;
 
