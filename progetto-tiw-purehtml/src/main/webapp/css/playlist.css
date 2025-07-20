@@ -4,10 +4,15 @@
     justify-content: center;
     margin-bottom: 20px;
 }
+
+.song-card a {
+	text-decoration: none;
+}
+
 .song-card {
     width: 180px;
     margin: 0 10px;
-    text-align: center;
+    text-align: center;    
 }
 .song-card img {
     width: 100%;
@@ -16,8 +21,9 @@
 }
 .nav-buttons {
     display: flex;
-    justify-content: space-between;
-    margin: 10px 0;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
 }
 
 
@@ -43,7 +49,8 @@ h2, h3 {
 }
 
 .song-card {
-  width: 180px;
+  width: 200px;
+  height: 250px;
   text-align: center;
   background-color: #fff;
   border-radius: 10px;
@@ -57,7 +64,7 @@ h2, h3 {
 }
 
 .song-card img {
-  width: 100%;
+  width: 100px;
   height: auto;
   border-radius: 8px;
 }
@@ -70,8 +77,8 @@ h2, h3 {
 
 .nav-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  justify-content: center;
+  
 }
 
 form {

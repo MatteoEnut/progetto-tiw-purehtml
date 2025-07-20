@@ -63,7 +63,7 @@ public class PlayerPage extends HttpServlet {
 		
 		try {
 			SongDAO songDAO = new SongDAO(connection);
-			song = songDAO.findSongById(songId);
+			song = songDAO.findSongByIdNoData(songId);
 			User user = (User) session.getAttribute("user");
 			
 			if (song == null || !song.getUsername().equals(user.getUsername())) {

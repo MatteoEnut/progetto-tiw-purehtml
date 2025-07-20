@@ -102,13 +102,13 @@ public class PlaylistPage extends HttpServlet {
 	        	return;
 	        }
 	        
-	        List<Song> allSongsInPlaylist = playlistDAO.findSongsByPlaylist(playlistId);
+	        List<Song> allSongsInPlaylist = playlistDAO.findSongsByPlaylistNoData(playlistId);
 	        int totalSongs = allSongsInPlaylist.size();
 	        
 	        int offset = page * pageSize;
-	        pagedSongs = playlistDAO.findSongsByPlaylistPaged(playlistId, offset, pageSize);
+	        pagedSongs = playlistDAO.findSongsByPlaylistPagedNoData(playlistId, offset, pageSize);
 
-	        allUserSongs = songDAO.findSongsByUser(user.getUsername());
+	        allUserSongs = songDAO.findSongsByUserNoData(user.getUsername());
 
 	       
 	        allUserSongs.removeIf(song -> allSongsInPlaylist.stream().anyMatch(s -> s.getId() == song.getId()));

@@ -14,14 +14,14 @@
             <form method="get" th:action="@{/Playlist}">
                 <input type="hidden" name="id" th:value="${playlist.id}" />
                 <input type="hidden" name="page" th:value="${page - 1}" />
-                <button type="submit">PRECEDENTI</button>
+                <button type="submit">Previous</button>
             </form>
         </div>
         <div th:if="${hasNext}">
             <form method="get" th:action="@{/Playlist}">
                 <input type="hidden" name="id" th:value="${playlist.id}" />
                 <input type="hidden" name="page" th:value="${page + 1}" />
-                <button type="submit">SUCCESSIVI</button>
+                <button type="submit">Next</button>
             </form>
         </div>
     </div>
@@ -33,6 +33,8 @@
                     <img th:src="@{'/GetSongMedia?id=' + ${song.id} + '&type=image'}" alt="Cover"/>
                 </div>
                 <p th:text="${song.title}"></p>
+                <p th:text="${song.artist}"></p>
+                <p th:text="${song.album}"></p>
             </a>
         </div>
     </div>

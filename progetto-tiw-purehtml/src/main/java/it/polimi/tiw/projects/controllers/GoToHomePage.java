@@ -90,7 +90,7 @@ public class GoToHomePage extends HttpServlet {
 
 	    try {
 	        SongDAO songDAO = new SongDAO(connection);
-	        userSongs = songDAO.findSongsByUser(user.getUsername());
+	        userSongs = songDAO.findSongsByUserNoData(user.getUsername());
 	    }
 	    catch (Exception e) {
 	    	ctx.setVariable("songListErrorMsg", "Unable to load songs");

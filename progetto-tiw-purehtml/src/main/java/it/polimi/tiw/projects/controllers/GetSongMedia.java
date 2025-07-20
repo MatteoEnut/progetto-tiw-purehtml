@@ -30,20 +30,15 @@ public class GetSongMedia extends HttpServlet {
 
 		try {
 			SongDAO songDAO = new SongDAO(connection);
-			Song song = songDAO.findSongById(songId);
-			if (song == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Song not found");
-				return;
-			}
 
 			byte[] data;
 			String contentType;
 
 			if ("image".equals(type)) {
-				data = song.getImage();
+				data = songDAO.findSongImageById(songId);
 				contentType = "image/jpeg";
 			} else if ("audio".equals(type)) {
-				data = song.getAudio();
+				data = songDAO.findSongAudioById(songId);
 				contentType = "audio/mpeg";
 			} else {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid media type");

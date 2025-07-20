@@ -88,6 +88,39 @@ public class PlaylistDAO {
 	    return songs;
 	}
 	
+	public List<Song> findSongsByPlaylistNoData(int playlistID) {
+	    List<Song> songs = new ArrayList<>();
+
+	    String query = 
+		        "SELECT s.id, s.title, s.album, s.artist, s.date, s.genre, s.username " +
+		        "FROM Song s JOIN Playlist_Song ps ON s.id = ps.song_id " +
+		        "WHERE ps.playlist_id = ? " +
+		        "ORDER BY s.artist ASC, s.date ASC";
+
+	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+	    	pstatement.setInt(1, playlistID);
+
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            while (result.next()) {
+	                Song song = new Song();
+	                song.setId(result.getInt("id"));
+	                song.setTitle(result.getString("title"));
+	                song.setAlbum(result.getString("album"));
+	                song.setArtist(result.getString("artist"));
+	                song.setDate(result.getDate("date"));
+	                song.setGenre(result.getString("genre"));
+	                song.setUsername(result.getString("username"));
+
+	                songs.add(song);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace(); 
+	    }
+
+	    return songs;
+	}
+	
 	public List<Song> findSongsByPlaylistPaged(int playlistID, int offset, int limit) {
 	    List<Song> songs = new ArrayList<>();
 
@@ -113,6 +146,42 @@ public class PlaylistDAO {
 	                song.setGenre(result.getString("genre"));
 	                song.setImage(result.getBytes("image"));
 	                song.setAudio(result.getBytes("audio"));
+	                song.setUsername(result.getString("username"));
+
+	                songs.add(song);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return songs;
+	}
+	
+	public List<Song> findSongsByPlaylistPagedNoData(int playlistID, int offset, int limit) {
+	    List<Song> songs = new ArrayList<>();
+
+	    String query = "SELECT s.id, s.title, s.album, s.artist, s.date, s.genre, s.username FROM Song s " +
+	                   "JOIN Playlist_Song ps ON s.id = ps.song_id " +
+	                   "WHERE ps.playlist_id = ? " +
+	                   "ORDER BY s.artist ASC, s.date ASC " +
+	                   "LIMIT ? OFFSET ?";
+
+	    
+	    try (PreparedStatement pstatement = connection.prepareStatement(query)) {
+	        pstatement.setInt(1, playlistID);
+	        pstatement.setInt(2, limit);
+	        pstatement.setInt(3, offset);
+
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            while (result.next()) {
+	                Song song = new Song();
+	                song.setId(result.getInt("id"));
+	                song.setTitle(result.getString("title"));
+	                song.setAlbum(result.getString("album"));
+	                song.setArtist(result.getString("artist"));
+	                song.setDate(result.getDate("date"));
+	                song.setGenre(result.getString("genre"));
 	                song.setUsername(result.getString("username"));
 
 	                songs.add(song);

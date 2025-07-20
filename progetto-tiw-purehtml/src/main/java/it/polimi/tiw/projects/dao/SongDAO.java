@@ -67,6 +67,33 @@ public class SongDAO {
 		return songs;
 	}
 	
+	public List<Song> findSongsByUserNoData(String username) throws SQLException {
+	    List<Song> songs = new ArrayList<>();
+
+	    String query = "SELECT id, title, album, artist, date, genre, username FROM song WHERE username = ? ORDER BY artist ASC, date ASC";
+	    try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+	        pstatement.setString(1, username);
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            while (result.next()) {
+	                Song song = new Song();
+	                song.setId(result.getInt("id"));
+	                song.setTitle(result.getString("title"));
+	                song.setAlbum(result.getString("album"));
+	                song.setArtist(result.getString("artist"));
+	                song.setDate(result.getDate("date"));
+	                song.setGenre(result.getString("genre"));
+	                song.setUsername(result.getString("username"));
+
+	                songs.add(song);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return songs;
+	}
+	
 	public Song findSongById(int id) throws SQLException {
 		Song song = null;
 
@@ -92,6 +119,67 @@ public class SongDAO {
 	    }
 
 		return song;
+	}
+	
+	public Song findSongByIdNoData(int id) throws SQLException {
+		Song song = null;
+
+		String query = "SELECT id, title, album, artist, date, genre, username FROM song WHERE id = ?";
+		try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+			pstatement.setInt(1, id);
+			try (ResultSet result = pstatement.executeQuery()) {
+				if (result.next()) {
+					song = new Song();
+					song.setId(result.getInt("id"));
+					song.setTitle(result.getString("title"));
+					song.setAlbum(result.getString("album"));
+					song.setArtist(result.getString("artist"));
+					song.setDate(result.getDate("date"));
+					song.setGenre(result.getString("genre"));
+					song.setUsername(result.getString("username"));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return song;
+	}
+	
+	public byte[] findSongAudioById(int songId) throws SQLException {
+	    byte[] audio = null;
+
+	    String query = "SELECT audio FROM song WHERE id = ?";
+	    try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+	        pstatement.setInt(1, songId);
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            if (result.next()) {
+	                audio = result.getBytes("audio");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return audio;
+	}
+
+	public byte[] findSongImageById(int songId) throws SQLException {
+	    byte[] image = null;
+
+	    String query = "SELECT image FROM song WHERE id = ?";
+	    try (PreparedStatement pstatement = conn.prepareStatement(query)) {
+	        pstatement.setInt(1, songId);
+	        try (ResultSet result = pstatement.executeQuery()) {
+	            if (result.next()) {
+	                image = result.getBytes("image");
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return image;
 	}
 
 	
