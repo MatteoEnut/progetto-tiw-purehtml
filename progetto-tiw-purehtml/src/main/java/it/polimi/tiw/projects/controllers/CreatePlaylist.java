@@ -92,7 +92,6 @@ public class CreatePlaylist extends HttpServlet {
             }
 
             connection.commit();
-            connection.setAutoCommit(true); 
 
         } catch (SQLException | NumberFormatException e) {
             try {
@@ -104,6 +103,13 @@ public class CreatePlaylist extends HttpServlet {
 		    request.getSession().setAttribute("playlistErrorMsg", "Unable to create playlist");
 		    response.sendRedirect(path);
             return;
+        }
+    	finally {
+        	try {
+				connection.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
         }
 
     	response.sendRedirect(path);

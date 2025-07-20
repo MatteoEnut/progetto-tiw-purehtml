@@ -72,7 +72,6 @@ public class AddSongsToPlaylist extends HttpServlet {
                 playlistDAO.addSongToPlaylist(playlistId, songId);
             }
             connection.commit();
-            connection.setAutoCommit(true);
             
         } catch (SQLException e) {
         	try {
@@ -85,6 +84,13 @@ public class AddSongsToPlaylist extends HttpServlet {
         	request.getSession().setAttribute("songErrorMsg", "Unable to complete database operation");
         	response.sendRedirect(playlistPath + playlistId);
         	return;
+        }
+        finally {
+        	try {
+				connection.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
         }
 
         // Redirect alla pagina playlist aggiornata
